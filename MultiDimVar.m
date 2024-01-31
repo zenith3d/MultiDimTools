@@ -4,8 +4,8 @@ classdef MultiDimVar
         values     = [];	% Table contenant les valeurs de la variable
         shape      = [];	% Taille du tableau
         n_dims 	   = 0;		% Nombre de dimensions du tableau
-        dim_names  = {};	% Noms des interpolants associés à chaque dimension
-        dim_points = {};	% Valeurs des interpolants associés à chaque dimension
+        dim_names  = {};	% Noms des interpolants associÃ©s Ã  chaque dimension
+        dim_points = {};	% Valeurs des interpolants associÃ©s Ã  chaque dimension
     end
     
     
@@ -17,8 +17,8 @@ classdef MultiDimVar
             dim_points = cellfun(@(x) reshape(x,[],1), dim_points, ...
                 'UniformOutput', false);
                         
-            % Initialisation des propriétés
-            % Reshaping du tableau 'values' dans le cas où il est de
+            % Initialisation des propriÃ©tÃ©s
+            % Reshaping du tableau 'values' dans le cas oÃ¹ il est de
             % dimension 1
             if length(dim_names) == 1
                 obj.values     = reshape(values,[],1);
@@ -37,7 +37,7 @@ classdef MultiDimVar
         end
         
         
-        % Fonctions élémentaires
+        % Fonctions Ã©lÃ©mentaires
         %  - squeeze(...)
         %  - augment(...)
         %  - permute(...)
@@ -47,19 +47,19 @@ classdef MultiDimVar
         % ----------------------------------------------------------------
            
         function out = squeeze(obj)
-            % SQUEEZE Supprime les dimensions singulières (singletons)
+            % SQUEEZE Supprime les dimensions singuliÃ¨res (singletons)
             
-            % Détermination des dimensions singulières
+            % DÃ©termination des dimensions singuliÃ¨res
             singleton_dims = find(obj.shape == 1);
             
-            % Si aucune dimension n'est singulière, on retourne l'instance
-            % intouchée
+            % Si aucune dimension n'est singuliÃ¨re, on retourne l'instance
+            % intouchÃ©e
             if isempty(singleton_dims)
                 out = obj;
                 return;
             end
             
-            % Suppression des dimensions singulières
+            % Suppression des dimensions singuliÃ¨res
             squeezed_dims       = setdiff(1:obj.n_dims, singleton_dims);
             squeezed_dim_names  = obj.dim_names(squeezed_dims);
             squeezed_dim_points = obj.dim_points(squeezed_dims);
@@ -68,53 +68,53 @@ classdef MultiDimVar
             squeezed_shape  = obj.shape(squeezed_dims);
             squeezed_values = reshape(obj.values, squeezed_shape);
             
-            % Création de l'instance retournée
+            % CrÃ©ation de l'instance retournÃ©e
             out = MultiDimVar(squeezed_values, squeezed_dim_names, ...
                       squeezed_dim_points);
         end
         
         function out = augment(obj, new_dim_names, new_dim_points)
-            % AUGMENT Ajoute des nouvelles dimensions à la variable
+            % AUGMENT Ajoute des nouvelles dimensions Ã  la variable
             
-            % Vérification de la cohérence des arguments
+            % VÃ©rification de la cohÃ©rence des arguments
             if length(new_dim_names) ~= length(new_dim_points)
                 error(['Augmentation impossible. Les arguments ne ' ...
-                       'sont pas cohérents entre eux : tailles ' ...
-                       'différentes.']);
+                       'sont pas cohÃ©rents entre eux : tailles ' ...
+                       'diffÃ©rentes.']);
             end
             
-            % Détermination des nouvelles dimensions
+            % DÃ©termination des nouvelles dimensions
             [aug_dim_names, i_objdims, i_newdims] = ...
                 union(obj.dim_names, new_dim_names, 'stable');
             aug_dim_points = {obj.dim_points{i_objdims}, ...
                 new_dim_points{i_newdims}};
             aug_shape 	   = cellfun(@length, aug_dim_points);              % A REMPLACER PAR [obj.shape(i_objdims) ????]
             
-            % Augmentation du tableau grâce à 'repmat'
+            % Augmentation du tableau grÃ¢ce Ã  'repmat'
             r = aug_shape; r(1:obj.n_dims) = 1;
             aug_values = repmat(obj.values, r);
             
-            % Création de l'instance retournée
+            % CrÃ©ation de l'instance retournÃ©e
             out = MultiDimVar(aug_values, aug_dim_names, aug_dim_points);
         end
         
         function out = permute(obj, permute_dim_names)
-            % PERMUTE Permute les dimensions de la variable de manière à 
-            % avoir ses dimensions dans l'ordre désiré
+            % PERMUTE Permute les dimensions de la variable de maniÃ¨re Ã  
+            % avoir ses dimensions dans l'ordre dÃ©sirÃ©
             
-            % Récupération des noms de dimensions qui concernent la
+            % RÃ©cupÃ©ration des noms de dimensions qui concernent la
             % variable
             reord_dim_names = ...
                 intersect(permute_dim_names, obj.dim_names, 'stable');
             if length(reord_dim_names) ~= length(obj.dim_names)
                 error(['Permutation des dimensions impossible. La ' ...
-                       'variable concernée dispose d''une ou de ' ...
+                       'variable concernÃ©e dispose d''une ou de ' ...
                        'plusieurs dimension(s) non contenue(s) dans ' ...
-                       'le tableau ordonné fourni.']);
+                       'le tableau ordonnÃ© fourni.']);
             end
             
-            % Détermination des indices de permutation puis permutation des
-            % noms et des valeurs associées
+            % DÃ©termination des indices de permutation puis permutation des
+            % noms et des valeurs associÃ©es
             [~, i_dims] = ismember(reord_dim_names, obj.dim_names);
             reord_dim_names  = obj.dim_names(i_dims);
             reord_dim_points = obj.dim_points(i_dims);
@@ -122,37 +122,37 @@ classdef MultiDimVar
             % Permutation du tableau
             reord_values = permute(obj.values, i_dims);
             
-            % Création de l'instance retournée
+            % CrÃ©ation de l'instance retournÃ©e
             out = MultiDimVar(reord_values, reord_dim_names, ...
                 reord_dim_points);
         end
         
         function out = sortdims(obj)
-            % SORTDIMS Trie les dimensions selon leur nom de manière 
+            % SORTDIMS Trie les dimensions selon leur nom de maniÃ¨re 
             % croissante
 
             % Tri des dimensions selon leur nom
             [sorted_dim_names, i_dims] = sort(obj.dim_names);
             sorted_dim_points = obj.dim_points(i_dims);
 
-            % Permutation du tabeau grâce à 'permute()'
+            % Permutation du tabeau grÃ¢ce Ã  'permute()'
             sorted_values = permute(obj.values, i_dims);
 
-            % Création de l'isntance retournée
+            % CrÃ©ation de l'isntance retournÃ©e
             out = MultiDimVar(sorted_values, sorted_dim_names, ...
                 sorted_dim_points);
         end
         
         function out = augmentas(obj, v)
-            % AUGMENTAS Augmente les dimensions du tableau de manière à 
-            % avoir ses dimensions identiques à la variable 'v' fournie
+            % AUGMENTAS Augmente les dimensions du tableau de maniÃ¨re Ã  
+            % avoir ses dimensions identiques Ã  la variable 'v' fournie
             
             out = obj.augment(v.dim_names, v.dim_points);
         end
         
         function out = permuteas(obj, v)
-            % PERMUTEAS Permute les dimensions de la variable de manière à 
-            % avoir ses dimensions dans un ordre identique à celles de la 
+            % PERMUTEAS Permute les dimensions de la variable de maniÃ¨re Ã  
+            % avoir ses dimensions dans un ordre identique Ã  celles de la 
             % variable 'v' fournie
             
             if obj.n_dims ~= v.n_dims || obj.n_dims == 1
@@ -163,7 +163,7 @@ classdef MultiDimVar
         end
         
         
-        % Fonctions avancées
+        % Fonctions avancÃ©es
         %  - fillmissing(...)
         %  - diff(...)
         %  - interpn(...)   /!\ A REVOIR /!\
@@ -172,19 +172,19 @@ classdef MultiDimVar
         % ----------------------------------------------------------------
         
         function out = fillmissing(obj, dim_name, method)
-            % FILLMISSING Remplie les entrées manquantes dans le tableau
-            % selon la méthode utilisée.
+            % FILLMISSING Remplie les entrÃ©es manquantes dans le tableau
+            % selon la mÃ©thode utilisÃ©e.
             
-            % Détermination de la dimension concernée
+            % DÃ©termination de la dimension concernÃ©e
             [~, i_objdim, ~] = intersect(obj.dim_names, dim_name, 'stable');
             
-            % Vérification
+            % VÃ©rification
             if isempty(i_objdim)
                 out = obj;
                 return;
             end
             
-            % Remplissage des valeurs manquantes selon la méthode choisie
+            % Remplissage des valeurs manquantes selon la mÃ©thode choisie
             out = obj;
             out.values = fillmissing(obj.values, method, i_objdim, ...
                                      'EndValues', 'extrap', ...
@@ -193,34 +193,34 @@ classdef MultiDimVar
         end
         
         function out = diff(obj, diff_dim_name, fill_missing)
-            % DIFF Calcule la dérivée de la variable en fonction de la
-            % dimension désirée.
+            % DIFF Calcule la dÃ©rivÃ©e de la variable en fonction de la
+            % dimension dÃ©sirÃ©e.
                         
-            % Détermination de la dimension concernée
+            % DÃ©termination de la dimension concernÃ©e
             [~, i_objdim, ~] = ...
                 intersect(obj.dim_names, diff_dim_name, 'stable');
             
-            % Si aucune dimension n'est concérnée ou que la dimension 
-            % concernée ne dispose que d'un seul point (singleton), la 
-            % dérivée est nulle
+            % Si aucune dimension n'est concÃ©rnÃ©e ou que la dimension 
+            % concernÃ©e ne dispose que d'un seul point (singleton), la 
+            % dÃ©rivÃ©e est nulle
             if isempty(i_objdim) || (obj.shape(i_objdim) < 2)
                 out = obj;
                 out.values(:) = 0;
                 return;
             end
                         
-            % Récupération des points correspondants à la dimension concernée
+            % RÃ©cupÃ©ration des points correspondants Ã  la dimension concernÃ©e
             pts       = obj.dim_points{i_objdim};
             end_index = obj.shape(i_objdim);
             
             % Initialisation de la table de sortie 
             dCdD = zeros(obj.shape);
             
-            % Définition de la structure 'subs' par défaut
+            % DÃ©finition de la structure 'subs' par dÃ©faut
             default_struct.type = '()';
             default_struct.subs = repmat({':'}, 1, obj.n_dims);
 
-            % Dérivée en debut de table (ordre 1)
+            % DÃ©rivÃ©e en debut de table (ordre 1)
             SD = default_struct; SD.subs{i_objdim} = 1;
             SH = default_struct; SH.subs{i_objdim} = 2;
             der = (squeeze(subsref(obj.values,SH)) - ...
@@ -228,7 +228,7 @@ classdef MultiDimVar
                   (pts(2) - pts(1));
             dCdD = subsasgn(dCdD, SD, der);
 
-            % Dérivée en fin de table (ordre 1)
+            % DÃ©rivÃ©e en fin de table (ordre 1)
             SD = default_struct; SD.subs{i_objdim} = end_index;
             SL = default_struct; SL.subs{i_objdim} = end_index-1;
             der = (squeeze(subsref(obj.values,SD)) - ...
@@ -236,8 +236,8 @@ classdef MultiDimVar
                   (pts(end_index) - pts(end_index-1));
             dCdD = subsasgn(dCdD, SD, der);
 
-            % Dérivée sur le reste de la table (ordre 2 - différence 
-            % centrale pondérée)
+            % DÃ©rivÃ©e sur le reste de la table (ordre 2 - diffÃ©rence 
+            % centrale pondÃ©rÃ©e)
             for i = 2:end_index-1
                 SD = default_struct; SD.subs{i_objdim} = i;
                 SL = default_struct; SL.subs{i_objdim} = i-1;
@@ -249,40 +249,40 @@ classdef MultiDimVar
                 dCdD = subsasgn(dCdD, SD, der);
             end
             
-            % Création de l'instance de sortie
+            % CrÃ©ation de l'instance de sortie
             out = MultiDimVar(dCdD, obj.dim_names, obj.dim_points);
 
         end
         
         function out = interpn(obj, interp_dim_names, ...
                 interp_dim_points, method, opts)
-            % INTERPN Réalise l'interpolation de la variable selon la ou 
-            % les dimensions désirées. Les tableaux contenus dans le 
-            % cellarray 'interp_dim_points' doivent être sous forme de 
+            % INTERPN RÃ©alise l'interpolation de la variable selon la ou 
+            % les dimensions dÃ©sirÃ©es. Les tableaux contenus dans le 
+            % cellarray 'interp_dim_points' doivent Ãªtre sous forme de 
             % vecteurs.
             
-            % Vérification de la cohérence des arguments
+            % VÃ©rification de la cohÃ©rence des arguments
             n_names  = length(interp_dim_names);
             n_points = length(interp_dim_points);
             if n_names ~= n_points
                 error(['Interpolation impossible. Les arguments ne ' ...
-                       'sont pas cohérents entre eux : tailles ' ...
-                       'différentes.']);
+                       'sont pas cohÃ©rents entre eux : tailles ' ...
+                       'diffÃ©rentes.']);
             end
             
-            % Détermination des dimensions concernées par l'interpolation :
+            % DÃ©termination des dimensions concernÃ©es par l'interpolation :
             % intersection des dimensions
             [~, i_objdims, i_intdims] = ...
                 intersect(obj.dim_names, interp_dim_names, 'stable');
             
-            % Si aucune dimension n'est concernée par l'interpolation, on
-            % retourne la variable intouchée
+            % Si aucune dimension n'est concernÃ©e par l'interpolation, on
+            % retourne la variable intouchÃ©e
             if isempty(i_objdims)
                 out = obj;
                 return;
             end
             
-            % Récupération des points associés à chaque dimension pour
+            % RÃ©cupÃ©ration des points associÃ©s Ã  chaque dimension pour
             % l'interpolation
             int_dim_names  = obj.dim_names;
             int_dim_points = obj.dim_points;
@@ -291,16 +291,16 @@ classdef MultiDimVar
                     interp_dim_points{i_intdims(dim)};
             end
             
-            % Interpolation de la variable selon la méthode choisie
+            % Interpolation de la variable selon la mÃ©thode choisie
             v = cell(1,length(int_dim_points));
             [v{:}] = ndgrid(int_dim_points{:});
             int_values = interpn(obj.dim_points{:}, obj.values, v{:}, ...
                 method);
             
-            % Création de l'instance de sortie
+            % CrÃ©ation de l'instance de sortie
             out = MultiDimVar(int_values, int_dim_names, int_dim_points);
             
-            % Suppression des dimensions singulières si désiré
+            % Suppression des dimensions singuliÃ¨res si dÃ©sirÃ©
             if nargin > 3 && strcmp(opts, 'squeeze')
                 out = out.squeeze();
             end
@@ -308,34 +308,39 @@ classdef MultiDimVar
         
         function out = interpt(obj, interp_dim_names, ...
                 interp_dim_points, method, opts)
-            % INTERPT Réalise l'interpolation de la variable selon la ou 
-            % les dimensions désirées, qui évoluent toutes en fonction d'un
-            % paramètre commun (en fonction du temps par ex.). Les tableaux
-            % contenus dans le cellarray 'interp_dim_points' doivent être 
-            % sous la forme de vecteurs de dimensions égales.
+            % INTERPT RÃ©alise l'interpolation de la variable selon la ou 
+            % les dimensions dÃ©sirÃ©es, qui Ã©voluent toutes en fonction d'un
+            % paramÃ¨tre commun (en fonction du temps par ex.). Les tableaux
+            % contenus dans le cellarray 'interp_dim_points' doivent Ãªtre 
+            % sous la forme de vecteurs de dimensions Ã©gales.
             
-            % Vérification de la cohérence des arguments
+            % VÃ©rification de la cohÃ©rence des arguments
             n_names  = length(interp_dim_names);
             n_points = length(interp_dim_points);
             if n_names ~= n_points
                 error(['Interpolation impossible. Les arguments ne ' ...
-                       'sont pas cohérents entre eux : tailles ' ...
-                       'différentes.']);
+                       'sont pas cohÃ©rents entre eux : tailles ' ...
+                       'diffÃ©rentes.']);
             end
             
-            % Détermination des dimensions concernées par l'interpolation :
+            % DÃ©termination des dimensions concernÃ©es par l'interpolation :
             % intersection des dimensions
             [~, i_objdims, i_intdims] = ...
                 intersect(obj.dim_names, interp_dim_names, 'stable');
             
-            % Si aucune dimension n'est concérnée par l'interpolation, on
-            % retourne la variable intouchée
+            % Si aucune dimension n'est concÃ©rnÃ©e par l'interpolation, on
+            % retourne la variable intouchÃ©e
             if isemtpy(i_objdims)
                 out = obj;
                 return;
             end
-            
-            % Récupération des valeurs associées à chaque dimension pour
+
+            error('Fonction non implÃ©mentÃ©e'); 
+            % - Revoir les deux paragraphes suivants : construction de v{:} Ã  changer
+            % - Ajouter de nouveaux args en entrÃ©e de la fonction : le nom du nouvel 
+            %   interpolant (par ex. 'TIME') ainsi que ses valeurs ;
+
+            % RÃ©cupÃ©ration des valeurs associÃ©es Ã  chaque dimension pour
             % l'interpolation
             int_dim_names  = obj.dim_names;
             int_dim_points = obj.dim_points;
@@ -344,16 +349,16 @@ classdef MultiDimVar
                     interp_dim_points{i_intdims(dim)};
             end
             
-            % Interpolation de la variable selon la méthode choisie
+            % Interpolation de la variable selon la mÃ©thode choisie
             v = cell(1,length(int_dim_points));
             [v{:}] = ndgrid(int_dim_points{:});
             int_values = interpn(obj.dim_points{:}, obj.values, v{:}, ...
                 method);
             
-            % Création de l'instance de sortie
+            % CrÃ©ation de l'instance de sortie
             out = MultiDimVar(int_values, int_dim_names, int_dim_points);
             
-            % Suppression des dimensions singulières si désiré
+            % Suppression des dimensions singuliÃ¨res si dÃ©sirÃ©
             if nargin > 3 && strcmp(opts, 'squeeze')
                 out = out.squeeze();
             end
@@ -361,51 +366,51 @@ classdef MultiDimVar
         
         function out = extrap(obj, extrap_dim_names, extrap_dim_points, ...
                 opts)
-            % EXTRAP Réalise l'extrapolation de la variable selon la 
-            % dimension désirée. Les tableaux contenus dans le cellarray 
-            % 'extrap_dim_points' doivent être sous forme de vecteurs.
-            error(['Extrapolation impossible. Fonction non implémentée.'])
+            % EXTRAP RÃ©alise l'extrapolation de la variable selon la 
+            % dimension dÃ©sirÃ©e. Les tableaux contenus dans le cellarray 
+            % 'extrap_dim_points' doivent Ãªtre sous forme de vecteurs.
+            error(['Extrapolation impossible. Fonction non implÃ©mentÃ©e.'])
         end
         
         function [out, I] = minalongdims(obj, dim_names, nanflag)
-            % MINALONGDIMS Détermine les éléments minimums sur les 
-            % dimensions spécifiées par 'dim_names'.
+            % MINALONGDIMS DÃ©termine les Ã©lÃ©ments minimums sur les 
+            % dimensions spÃ©cifiÃ©es par 'dim_names'.
             
             if nargin < 3
                 nanflag = 'omitnan';
             end
             
-            % Détermination des dimensions concernées
+            % DÃ©termination des dimensions concernÃ©es
             [~, i_dims, ~] = intersect(obj.dim_names, dim_names, 'stable');
             
-            % Vérification
+            % VÃ©rification
             if isempty(i_dims)
                 out = [];
                 return;
             end
             
-            % Récupération des dimensions non concernées
+            % RÃ©cupÃ©ration des dimensions non concernÃ©es
             i_not_dims     = setxor(1:obj.n_dims, i_dims);
             not_dim_names  = obj.dim_names(i_not_dims);
             not_dim_points = obj.dim_points(i_not_dims);
             
-            % Détermination des éléments minimums sur les dimensions
-            % désirées
+            % DÃ©termination des Ã©lÃ©ments minimums sur les dimensions
+            % dÃ©sirÃ©es
             [~,I] = min(obj.values, [], i_dims, nanflag, 'linear');
             indices = cell(obj.n_dims, 1);
             [indices{:}] = ind2sub(obj.shape, squeeze(I));
             
-            % Allocation du nombre d'instances 'MultiDimVar' à retourner
+            % Allocation du nombre d'instances 'MultiDimVar' Ã  retourner
             n   = length(i_dims);
             out = cell(n,1);
             
-            % Récupération des valeurs de chaque dimension qui minimise
+            % RÃ©cupÃ©ration des valeurs de chaque dimension qui minimise
             % 'obj.values'
             for i = 1:n
                 i_dim  = i_dims(i);
                 min_index_values = obj.dim_points{i_dim}(indices{i_dim});
                 
-                % Création de nouvelles instances MultiDimVar
+                % CrÃ©ation de nouvelles instances MultiDimVar
                 out{i} = MultiDimVar(min_index_values, not_dim_names, ...
                     not_dim_points);
             end
@@ -413,7 +418,7 @@ classdef MultiDimVar
         end
         
         
-        % Overriding des opérateurs élémentaires
+        % Overriding des opÃ©rateurs Ã©lÃ©mentaires
         % ----------------------------------------------------------------
         
         function r = lt(a,b)
@@ -452,7 +457,7 @@ classdef MultiDimVar
                 return;
             end
                         
-            % Augmentation des variables si nécessaire
+            % Augmentation des variables si nÃ©cessaire
             a_aug = a.augmentas(b);
             b_aug = b.augmentas(a);
             
@@ -477,7 +482,7 @@ classdef MultiDimVar
                 return;
             end
                         
-            % Augmentation des variables si nécessaire
+            % Augmentation des variables si nÃ©cessaire
             a_aug = a.augmentas(b);
             b_aug = b.augmentas(a);
             
@@ -512,7 +517,7 @@ classdef MultiDimVar
                 return;
             end
                         
-            % Augmentation des variables si nécessaire
+            % Augmentation des variables si nÃ©cessaire
             a_aug = a.augmentas(b);
             b_aug = b.augmentas(a);
             
@@ -548,14 +553,14 @@ classdef MultiDimVar
                 return;
             end
             
-            % Vérification de la cohérence entre les variables
+            % VÃ©rification de la cohÃ©rence entre les variables
 %             if isempty(setxor(a.dim_names, b.dim_names))
 %                 r = a;
 %                 r.values = a.values .^ b.values;
 %                 return;
 %             end
             
-            % Augmentation des variables si nécessaire
+            % Augmentation des variables si nÃ©cessaire
             a_aug = a.augmentas(b);
             b_aug = b.augmentas(a);
             
@@ -685,7 +690,7 @@ end
 
 function err = inputs_consistency(values, dim_names, dim_points)
 
-% Vérification de la cohérence des entrées
+% VÃ©rification de la cohÃ©rence des entrÃ©es
 values_ndims = ndims(values);
 points_ndims = length(dim_names);
 names_ndims  = length(dim_names);
